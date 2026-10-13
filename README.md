@@ -26,9 +26,9 @@ Like Sky Team, you pick a difficulty and then one of six scenarios inside it. Ev
 
 ## Files
 
-- `index.html` – the built app. Open it in any browser; it has no other dependencies.
+- `index.html` – the built app, a full phone-ready page (served by GitHub Pages). On iPhone, use Share → Add to Home Screen to play it full screen without the Safari bars.
 - `src/app.html` – the app source, with a `/*SPRITES*/` placeholder for the piece art.
 - `pieces/` – the 12 piece images (each food, flat and on long edge), cut from the cheat-sheet mockup.
-- `build.py` – embeds the piece images into `src/app.html` to produce `index.html` (needs Pillow).
+- `build.py` – embeds the piece images into `src/app.html` to produce `index.html`, plus `dist/artifact.html` for the Claude app (needs Pillow).
 
 Cleared scenarios are saved in the browser's local storage on the device you play on.

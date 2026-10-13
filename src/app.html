@@ -21,11 +21,14 @@
   --body: "Nunito Sans", system-ui, sans-serif;
   color-scheme: dark;
 }
-html, body { height: 100%; }
-body { background: var(--frame); color: var(--card); font-family: var(--body); }
+html, body { height: 100%; margin: 0; }
+html { background: var(--frame); -webkit-text-size-adjust: 100%; }
+body { background: var(--frame); color: var(--card); font-family: var(--body); font-size: 14px; }
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
 .app {
-  height: 100%; max-width: 620px; margin: 0 auto; box-sizing: border-box;
-  padding: 12px 16px 16px; display: grid; grid-template-rows: auto 1fr auto; gap: 12px;
+  height: 100%; height: 100dvh; max-width: 620px; margin: 0 auto;
+  padding: max(12px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)); display: grid; grid-template-rows: auto 1fr auto; gap: 12px;
 }
 
 /* header */
@@ -47,10 +50,13 @@ body { background: var(--frame); color: var(--card); font-family: var(--body); }
 .card-head .sep i { width: 2px; align-self: stretch; background: #dccdb0; }
 .count { font-variant-numeric: tabular-nums; color: var(--go); min-width: 1.4em; text-align: right; }
 
-.order { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 10px; align-items: stretch; }
+.card.fill { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+.card.fill .order { flex: 1 1 auto; min-height: 0; }
+.order { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 10px; align-items: stretch; }
 .stackbox { background: var(--well); border-radius: 8px; min-height: 240px; position: relative; }
 .stackbox svg { position: absolute; inset: 6px; width: calc(100% - 12px); height: calc(100% - 12px); }
-.list { display: flex; flex-direction: column-reverse; gap: 5px; }
+.list { display: flex; flex-direction: column-reverse; justify-content: flex-start; gap: 5px; min-height: 0; }
+.card.fill .row { flex: 1 1 0; max-height: 84px; min-height: 40px; }
 .row {
   display: grid; grid-template-columns: 26px 50px minmax(0, 1fr) auto; align-items: center; gap: 6px;
   background: var(--row); border-radius: 7px; padding: 4px 6px; border: 0; color: inherit; font: inherit; text-align: left; width: 100%;
@@ -58,6 +64,8 @@ body { background: var(--frame); color: var(--card); font-family: var(--body); }
 .num { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--owner); color: var(--ink); border: 2px solid var(--ink); font: 700 .85rem var(--display); }
 .num.beth { color: #fff; }
 .row img { width: 50px; height: 38px; object-fit: contain; display: block; }
+.card.fill .row img { width: 52px; height: min(48px, 100%); }
+.card.fill .row { grid-template-columns: 26px 52px minmax(0, 1fr) auto; }
 .row .lbl { min-width: 0; display: grid; line-height: 1.05; }
 .row .lbl b { font: 700 .92rem var(--display); }
 .row .lbl span { font: 600 .66rem var(--display); letter-spacing: .06em; text-transform: uppercase; }
@@ -261,7 +269,8 @@ function stackSVG(checkable) {
   });
   const minY = Math.min(...placed.map(p => p.y)) - 6;
   const maxY = 44;
-  const vb = `-112 ${minY} 212 ${maxY - minY}`;
+  const maxX = Math.max(84, ...placed.map(p => p.x + p.w)) + 4;
+  const vb = `-110 ${minY} ${110 + maxX} ${maxY - minY}`;
   const plate = `
     <ellipse cx="0" cy="24" rx="84" ry="27" fill="#b9c2cf"/>
     <ellipse cx="0" cy="18" rx="84" ry="27" fill="#eef1f5"/>
@@ -294,7 +303,7 @@ function listHTML(checkable) {
   }).join("")}</div>`;
 }
 function orderCard(checkable, extra = "") {
-  return `<div class="card">
+  return `<div class="card fill">
     <div class="card-head"><span>Order ${S.round + 1}</span><span class="sep"><i></i><span>${S.order.length} high</span>${checkable ? "" : `<i></i><span class="count" id="count">${S.peek}</span>`}</span></div>
     <div class="order${S.order.length >= 7 ? " tall" : ""}"><div class="stackbox">${stackSVG(checkable)}</div>${listHTML(checkable)}</div>
     ${extra}
