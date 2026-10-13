@@ -5,7 +5,7 @@ A one-screen companion app for **Food Van**, a two-player co-op memory and dexte
 ## How a shift works
 
 1. Pick a difficulty and a scenario (or a Random shift). The six foods are split randomly between Joe and Beth once, and each player keeps their three foods for the whole run.
-2. Tap **Peek** to see the order: an isometric stack on the plate, numbered from the bottom up, with each piece shown **Flat** or **On long edge**. Only the top piece can ever be on its long edge, and about half the orders have one.
+2. Tap **Peek** to see the order: an isometric stack on the plate, numbered from the bottom up, with every piece lying flat, either **Straight** or **Turned ↻** (rotated 90 degrees on the plate). Any piece in the stack can be turned.
 3. When the peek runs out the order hides. No talking about the order. Build it with tweezers, piece 1 on the plate first.
 4. Tap **Reveal order**, then tap any piece you got wrong.
 5. Every mode starts with a **6-second peek**. Each wrong piece takes one second off it for the rest of the run. If the peek hits zero, you lose. Survive all six orders to clear the scenario.
