@@ -4,34 +4,25 @@ A one-screen companion app for **Food Van**, a two-player co-op memory and dexte
 
 ## How a shift works
 
-1. Pick a mode. The six foods are split randomly between Joe and Beth once, and each player keeps their three foods for the whole run.
+1. Pick a difficulty and a scenario (or a Random shift). The six foods are split randomly between Joe and Beth once, and each player keeps their three foods for the whole run.
 2. Tap **Peek** to see the order: an isometric stack on the plate, numbered from the bottom up, with each piece shown **Flat** or **On long edge**.
 3. When the peek runs out the order hides. No talking about the order. Build it with tweezers, piece 1 on the plate first.
 4. Tap **Reveal order**, then tap any piece you got wrong.
-5. Every mode starts with a **6-second peek**. Each wrong piece takes one second off it for the rest of the run. If the peek hits zero, you lose. Survive all six orders to clear the mode.
+5. Every mode starts with a **6-second peek**. Each wrong piece takes one second off it for the rest of the run. If the peek hits zero, you lose. Survive all six orders to clear the scenario.
 
-## Modes
+## Difficulties and scenarios
 
-**The ladder** gets harder only by stack height. Clearing one unlocks the next.
+Like Sky Team, you pick a difficulty and then one of six scenarios inside it. Every scenario starts with the same 6-second peek; difficulty comes only from stack height. Each scenario always deals the same six orders, so you can replay it and learn it. All scenarios are open from the start.
 
-| Mode | Stack heights |
-|---|---|
-| Lunch Rush | 4–5 |
-| Market Day | 5–6 |
-| Festival Friday | 5–7 |
-| Late Night Queue | 6–8 |
-| Nightmare Shift | 7–8 |
-
-**Twists** are open from the start and sit at a similar difficulty, changing the shape of the orders instead.
-
-| Mode | Stack heights | Twist |
+| Difficulty | Stack heights | Scenarios |
 |---|---|---|
-| Flat Out | 5–7 | Every piece lies flat |
-| Stand Tall | 5–7 | Every piece on its long edge |
-| Ping Pong | 5–6 | Joe and Beth take strict turns |
-| Doubles | 6 | Three foods, each one twice |
+| Easy | 4–5 | Morning Coffee, School Pickup, Farmers Market, Beach Car Park, Sausage Sizzle, Sunday Brunch |
+| Medium | 5–6 | Lunch Rush, Office Park, Rainy Day, Uni Open Day, Car Show, Twilight Cinema |
+| Hard | 5–7 | Festival Friday, Night Market, Wedding Reception, Stadium Gates, Long Weekend, Heatwave |
+| Expert | 6–8 | Late Night Queue, Grand Final Day, New Year's Eve, Music Festival, Food Truck Rally, Closing Time |
+| Nightmare | 7–8 | Nightmare Shift, Health Inspection, Power Outage, Royal Visit, Double Booking, The Last Sausage |
 
-**Random shift** rolls a stack height from 4 to 8 for every order.
+**Random shift** rolls a fresh stack height from 4 to 8 for every order, and new orders every time.
 
 ## Files
 
@@ -40,4 +31,4 @@ A one-screen companion app for **Food Van**, a two-player co-op memory and dexte
 - `pieces/` – the 12 piece images (each food, flat and on long edge), cut from the cheat-sheet mockup.
 - `build.py` – embeds the piece images into `src/app.html` to produce `index.html` (needs Pillow).
 
-Scenario unlocks are saved in the browser's local storage on the device you play on.
+Cleared scenarios are saved in the browser's local storage on the device you play on.

@@ -96,6 +96,26 @@ body { background: var(--frame); color: var(--card); font-family: var(--body); }
 .msec { margin: 8px 2px 2px; font: 700 .8rem var(--display); letter-spacing: .1em; text-transform: uppercase; display: flex; justify-content: space-between; gap: 8px; }
 .msec:first-child { margin-top: 0; }
 .msec span { font: 600 .7rem var(--body); letter-spacing: 0; text-transform: none; color: var(--ink-soft); }
+.tier { display: grid; grid-template-columns: 14px minmax(0,1fr) auto; align-items: center; gap: 12px; background: var(--row); border: 0; border-left: 6px solid var(--tc); border-radius: 8px; padding: 10px 12px; color: var(--ink); font: inherit; text-align: left; cursor: pointer; width: 100%; }
+.tier .tdot { width: 14px; height: 14px; border-radius: 50%; background: var(--tc); border: 2px solid var(--ink); }
+.tier .sname b { font: 700 1.15rem var(--display); text-transform: uppercase; }
+.tprog { display: grid; justify-items: end; gap: 3px; font: 700 .8rem var(--display); }
+.pips6 { display: flex; gap: 3px; }
+.pips6 i { width: 8px; height: 8px; border: 1.5px solid var(--ink); }
+.pips6 i.on { background: var(--tc); }
+.tier:focus-visible, .scard:focus-visible, .back:focus-visible { outline: 3px solid var(--go); outline-offset: 2px; }
+.back { background: var(--ink); color: var(--card); border: 0; border-radius: 6px; width: 32px; height: 32px; font: 700 1.4rem/1 var(--display); cursor: pointer; flex: none; }
+.card-head:has(.back) { justify-content: flex-start; }
+.sgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.scard { position: relative; display: grid; gap: 4px; align-content: start; background: var(--row); border: 0; border-top: 5px solid var(--tc); border-radius: 8px; padding: 8px 10px 10px; color: var(--ink); font: inherit; text-align: left; cursor: pointer; min-width: 0; }
+.scard .shead { display: flex; justify-content: space-between; align-items: center; }
+.scard .snum { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; border: 2px solid var(--ink); background: var(--card); font: 700 .8rem var(--display); }
+.scard .tick { width: 22px; height: 22px; border-radius: 4px; display: grid; place-items: center; background: var(--good); color: #fff; font: 700 .85rem var(--display); }
+.scard b { font: 700 .98rem/1.1 var(--display); text-transform: uppercase; min-height: 2.2em; text-wrap: balance; }
+.bars { display: flex; align-items: flex-end; gap: 3px; height: 30px; }
+.bars i { flex: 1; background: var(--tc); border: 1.5px solid var(--ink); border-bottom-width: 2px; }
+.hrange { font: 600 .7rem var(--display); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+.scard.done { background: #e6f0dc; }
 .menu-note { margin: 10px 2px 2px; font-size: .8rem; color: var(--ink-soft); }
 
 /* stations */
@@ -167,72 +187,66 @@ const art = (food, edge) => ART[food][edge ? "edge" : "flat"];
 const img = (food, edge, alt = "") => `<img src="${art(food, edge)[0]}" alt="${alt}">`;
 
 const PLAYERS = { joe: { name: "Joe", color: "var(--joe)" }, beth: { name: "Beth", color: "var(--beth)" } };
-// Scenario ladder: all six foods every time; only stack heights and starting peek change.
-// Every mode starts at the same peek; the ladder gets harder only by stack height.
-// Twists sit at a similar difficulty and change the shape of the orders instead.
-const START_PEEK = 6;
-const SCENARIOS = [
-  { name: "Lunch Rush",       stacks: [4, 4, 4, 5, 5, 5], ladder: true },
-  { name: "Market Day",       stacks: [5, 5, 5, 6, 6, 6], ladder: true },
-  { name: "Festival Friday",  stacks: [5, 6, 6, 6, 7, 7], ladder: true },
-  { name: "Late Night Queue", stacks: [6, 6, 7, 7, 7, 8], ladder: true },
-  { name: "Nightmare Shift",  stacks: [7, 7, 8, 8, 8, 8], ladder: true },
-  { name: "Flat Out",   stacks: [5, 5, 6, 6, 7, 7], rule: "flat",      blurb: "Every piece lies flat" },
-  { name: "Stand Tall", stacks: [5, 5, 6, 6, 7, 7], rule: "edge",      blurb: "Every piece on its long edge" },
-  { name: "Ping Pong",  stacks: [5, 5, 6, 6, 6, 6], rule: "alternate", blurb: "Joe and Beth take strict turns" },
-  { name: "Doubles",    stacks: [6, 6, 6, 6, 6, 6], rule: "pairs",     blurb: "Three foods, each one twice" }
+// Sky Team style: pick a difficulty, then one of six fixed scenarios in it.
+// Every scenario starts at the same peek; difficulty comes only from stack height.
+// Each scenario's orders are fixed (seeded), so replays are the same orders you can learn.
+const START_PEEK = 6, ORDERS = 6;
+const TIERS = [
+  { name: "Easy", range: "4–5 high", color: "#3f9a57", list: [
+    ["Morning Coffee", [4, 4, 4, 4, 5, 5]], ["School Pickup", [4, 5, 4, 5, 4, 5]], ["Farmers Market", [5, 5, 4, 4, 4, 4]],
+    ["Beach Car Park", [4, 4, 5, 4, 4, 5]], ["Sausage Sizzle", [4, 5, 5, 4, 5, 5]], ["Sunday Brunch", [5, 4, 5, 5, 4, 5]] ] },
+  { name: "Medium", range: "5–6 high", color: "#e9b62f", list: [
+    ["Lunch Rush", [5, 5, 5, 6, 6, 6]], ["Office Park", [5, 6, 5, 6, 5, 6]], ["Rainy Day", [6, 6, 5, 5, 5, 5]],
+    ["Uni Open Day", [5, 5, 6, 5, 6, 6]], ["Car Show", [6, 5, 6, 6, 5, 6]], ["Twilight Cinema", [5, 6, 6, 6, 6, 6]] ] },
+  { name: "Hard", range: "5–7 high", color: "#ff8a3d", list: [
+    ["Festival Friday", [5, 6, 6, 7, 7, 7]], ["Night Market", [6, 5, 7, 5, 7, 6]], ["Wedding Reception", [7, 7, 6, 6, 5, 5]],
+    ["Stadium Gates", [6, 6, 6, 7, 6, 7]], ["Long Weekend", [5, 7, 5, 7, 5, 7]], ["Heatwave", [6, 7, 7, 6, 7, 7]] ] },
+  { name: "Expert", range: "6–8 high", color: "#e2372f", list: [
+    ["Late Night Queue", [6, 6, 7, 7, 8, 8]], ["Grand Final Day", [7, 6, 8, 6, 8, 7]], ["New Year's Eve", [8, 8, 7, 7, 6, 6]],
+    ["Music Festival", [7, 7, 7, 8, 7, 8]], ["Food Truck Rally", [6, 8, 6, 8, 6, 8]], ["Closing Time", [7, 8, 8, 7, 8, 8]] ] },
+  { name: "Nightmare", range: "7–8 high", color: "#8b2bb0", list: [
+    ["Nightmare Shift", [7, 7, 8, 8, 8, 8]], ["Health Inspection", [8, 7, 8, 7, 8, 8]], ["Power Outage", [8, 8, 8, 7, 7, 7]],
+    ["Royal Visit", [7, 8, 8, 8, 8, 8]], ["Double Booking", [8, 7, 8, 8, 7, 8]], ["The Last Sausage", [8, 8, 8, 8, 8, 8]] ] }
 ];
-const nextLadder = i => { for (let j = i + 1; j < SCENARIOS.length; j++) if (SCENARIOS[j].ladder) return j; return -1; };
-const prevLadder = i => { for (let j = i - 1; j >= 0; j--) if (SCENARIOS[j].ladder) return j; return -1; };
-const ORDERS = 6;
+const scenOf = id => { const [t, i] = id.split("-").map(Number); const [name, stacks] = TIERS[t].list[i]; return { id, t, i, name, stacks }; };
+const nextId = id => { const { t, i } = scenOf(id); return i < 5 ? `${t}-${i + 1}` : t < TIERS.length - 1 ? `${t + 1}-0` : null; };
+
 let raf = 0, S, progress = { cleared: [] };
 try { progress = JSON.parse(localStorage.getItem("foodvan-progress")) || progress; } catch (e) {}
+if (!Array.isArray(progress.cleared)) progress = { cleared: [] };
 const saveProgress = () => { try { localStorage.setItem("foodvan-progress", JSON.stringify(progress)); } catch (e) {} };
-const isCleared = i => progress.cleared.includes(SCENARIOS[i].name);
-const unlocked = i => !SCENARIOS[i].ladder || prevLadder(i) < 0 || isCleared(prevLadder(i));
+const isCleared = id => progress.cleared.includes(id);
+const tierCleared = t => TIERS[t].list.filter((_, i) => isCleared(`${t}-${i}`)).length;
 
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const ownerOf = food => S.split.joe.includes(food) ? "joe" : "beth";
+// small seeded random generator so each scenario always deals the same orders
+const seeded = seed => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+function makeOrder(len, rnd) {
+  const order = [], used = {};
+  while (order.length < len) {
+    const f = KEYS[rnd() * KEYS.length | 0];
+    if ((used[f] || 0) >= 2) continue;
+    used[f] = (used[f] || 0) + 1;
+    order.push({ food: f, edge: rnd() < 0.5 });
+  }
+  return order;
+}
 
-function openMenu() { cancelAnimationFrame(raf); S = { phase: "menu" }; }
-function startScenario(si) {
-  const rand = si === "random";
-  // a random shift rolls fresh stack heights (3-7) every time, so you never know what's coming
-  const sc = rand ? { name: "Random shift", stacks: Array.from({ length: ORDERS }, () => 4 + (Math.random() * 5 | 0)) } : SCENARIOS[si];
+function openMenu(tier = null) { cancelAnimationFrame(raf); S = { phase: "menu", tier }; }
+function startScenario(id) {
+  const rand = id === "random";
+  const sc = rand ? { name: "Random shift", stacks: Array.from({ length: ORDERS }, () => 4 + (Math.random() * 5 | 0)) } : scenOf(id);
   const deck = shuffle(KEYS);
   // the split is rolled once per run and kept for all six orders
-  S = { sc: si, rand, scen: sc, round: 0, peek: START_PEEK, phase: "ready", history: [], lastPenalty: null, split: { joe: deck.slice(0, 3), beth: deck.slice(3) } };
+  S = { id, rand, scen: sc, round: 0, peek: START_PEEK, phase: "ready", history: [], lastPenalty: null, split: { joe: deck.slice(0, 3), beth: deck.slice(3) } };
+  if (!rand) { const rnd = seeded(7919 * (sc.t + 1) + 104729 * (sc.i + 1)); S.fixed = sc.stacks.map(len => makeOrder(len, rnd)); }
   dealRound();
 }
 function dealRound() {
-  const len = S.scen.stacks[S.round];
-  const rule = S.scen.rule, pose = () => ({ edge: Math.random() < 0.5 });
   let order;
-  do {
-    order = []; const used = {};
-    if (rule === "pairs") {
-      const picks = shuffle(KEYS).slice(0, Math.ceil(len / 2));
-      order = shuffle([...picks, ...picks]).slice(0, len).map(f => ({ food: f, ...pose() }));
-    } else if (rule === "alternate") {
-      let p = Math.random() < 0.5 ? "joe" : "beth";
-      while (order.length < len) {
-        const f = S.split[p][Math.random() * 3 | 0];
-        if ((used[f] || 0) >= 2) continue;
-        used[f] = (used[f] || 0) + 1;
-        order.push({ food: f, ...pose() });
-        p = p === "joe" ? "beth" : "joe";
-      }
-    } else {
-      while (order.length < len) {
-        const f = KEYS[Math.random() * KEYS.length | 0];
-        if ((used[f] || 0) >= 2) continue;
-        used[f] = (used[f] || 0) + 1;
-        order.push({ food: f, ...pose() });
-      }
-    }
-    if (rule === "flat") order.forEach(o => o.edge = false);
-    if (rule === "edge") order.forEach(o => o.edge = true);
-  } while (new Set(order.map(o => ownerOf(o.food))).size < 2);
+  if (S.fixed) order = S.fixed[S.round].map(o => ({ ...o }));
+  else do { order = makeOrder(S.scen.stacks[S.round], Math.random); } while (new Set(order.map(o => ownerOf(o.food))).size < 2);
   S.order = order; S.marks = order.map(() => true); S.phase = "ready";
 }
 
@@ -295,13 +309,21 @@ function stationsHTML(compact) {
 }
 
 // ---------- render ----------
-function scenRow(sc, i, mark) {
-  const open = unlocked(i), done = isCleared(i);
-  const sub = `${sc.stacks[0]}–${sc.stacks[ORDERS - 1]} high${sc.blurb ? ` · ${sc.blurb}` : ""}`;
-  return `<button class="scen${open ? "" : " locked"}" type="button" data-sc="${i}" ${open ? "" : "disabled"}>
-    <span class="snum">${mark}</span>
-    <span class="sname"><b>${sc.name}</b><span>${sub}</span></span>
-    <span class="sbadge">${done ? "Cleared" : open ? "Play" : "Locked"}</span>
+function tierRow(t) {
+  const T = TIERS[t], n = tierCleared(t);
+  return `<button class="tier" type="button" data-tier="${t}" style="--tc:${T.color}">
+    <span class="tdot"></span>
+    <span class="sname"><b>${T.name}</b><span>${T.range} · 6 scenarios</span></span>
+    <span class="tprog"><span class="pips6">${T.list.map((_, i) => `<i${isCleared(`${t}-${i}`) ? ' class="on"' : ""}></i>`).join("")}</span>${n}/6</span>
+  </button>`;
+}
+function scenCard(t, i) {
+  const [name, stacks] = TIERS[t].list[i], id = `${t}-${i}`, done = isCleared(id);
+  return `<button class="scard${done ? " done" : ""}" type="button" data-sc="${id}" style="--tc:${TIERS[t].color}">
+    <span class="shead"><span class="snum">${i + 1}</span>${done ? '<span class="tick">✓</span>' : ""}</span>
+    <b>${name}</b>
+    <span class="bars" aria-label="Stack heights ${stacks.join(", ")}">${stacks.map(h => `<i style="height:${(h - 2) / 6 * 100}%"></i>`).join("")}</span>
+    <span class="hrange">${Math.min(...stacks)}–${Math.max(...stacks)} high</span>
   </button>`;
 }
 const $ = id => document.getElementById(id);
@@ -310,30 +332,34 @@ const stage = $("stage"), go = $("go");
 function render() {
   const menu = S.phase === "menu";
   $("orderNo").textContent = menu ? "—" : S.phase === "end" ? "Done" : `${S.round + 1}/${ORDERS}`;
-  $("orderTag").textContent = menu ? "★" : S.rand ? "?" : S.sc + 1;
+  $("orderTag").textContent = menu ? "★" : S.rand ? "?" : `${TIERS[S.scen.t].name[0]}${S.scen.i + 1}`;
   $("peekNo").textContent = menu ? "—" : `${S.peek}s`;
   $("restart").hidden = menu;
   go.disabled = false; go.className = "btn"; go.hidden = false;
 
-  if (menu) {
+  if (menu && S.tier === null) {
     stage.innerHTML = `<div class="card">
-      <div class="card-head"><span>Pick a mode</span><span style="font-size:.8rem">6 orders · ${START_PEEK}s peek</span></div>
-      <div class="menu">
-      <h4 class="msec">The ladder <span>gets taller as you climb</span></h4>
-      ${SCENARIOS.map((sc, i) => sc.ladder ? scenRow(sc, i, i + 1) : "").join("")}
-      <h4 class="msec">Twists <span>same challenge, different shape</span></h4>
-      ${SCENARIOS.map((sc, i) => sc.ladder ? "" : scenRow(sc, i, "✦")).join("")}
+      <div class="card-head"><span>Pick a difficulty</span><span style="font-size:.8rem">${START_PEEK}s peek</span></div>
+      <div class="menu">${TIERS.map((_, t) => tierRow(t)).join("")}
       <button class="scen random" type="button" data-sc="random">
         <span class="snum">?</span>
         <span class="sname"><b>Random shift</b><span>4–8 high · different every time</span></span>
         <span class="sbadge">Play</span>
       </button></div>
-      <p class="menu-note">Every mode starts with a ${START_PEEK}-second peek. Each wrong piece takes a second off it. If it hits zero, you lose. Survive all six orders to clear a mode.</p>
+      <p class="menu-note">Every scenario starts with a ${START_PEEK}-second peek. Each wrong piece takes a second off it. If it hits zero, you lose. Survive all six orders to clear the scenario.</p>
+    </div>`;
+    go.hidden = true;
+  } else if (menu) {
+    const T = TIERS[S.tier];
+    stage.innerHTML = `<div class="card">
+      <div class="card-head"><button class="back" type="button" data-back="1" aria-label="Back to difficulties">‹</button><span style="flex:1">${T.name}</span><span style="font-size:.8rem">${T.range} · ${tierCleared(S.tier)}/6</span></div>
+      <div class="sgrid">${T.list.map((_, i) => scenCard(S.tier, i)).join("")}</div>
+      <p class="menu-note">Each scenario deals the same six orders every time, so you can learn it. The bars show how tall each order is.</p>
     </div>`;
     go.hidden = true;
   } else if (S.phase === "ready") {
     const pen = S.lastPenalty;
-    const note = pen === null ? `${S.scen.name}${S.scen.blurb ? ` · ${S.scen.blurb.toLowerCase()}` : ""}. These are your foods for the whole run.`
+    const note = pen === null ? `${S.rand ? "Random shift" : `${TIERS[S.scen.t].name} · ${S.scen.name}`}. These are your foods for the whole run.`
       : pen === 0 ? `<b class="ok">Perfect plate.</b> Peek time holds.`
       : `<b>−${pen}s</b> for ${pen} wrong piece${pen > 1 ? "s" : ""} last order.`;
     stage.innerHTML = `${stationsHTML(false)}
@@ -353,7 +379,7 @@ function render() {
     go.textContent = dead ? "Out of time" : last ? "Close the van" : "Next order";
   } else {
     const right = S.history.reduce((a, h) => a + h.right, 0), total = S.history.reduce((a, h) => a + h.len, 0);
-    const passed = !S.lost, nxt = S.rand || !S.scen.ladder ? -1 : nextLadder(S.sc), hasNext = nxt >= 0;
+    const passed = !S.lost, nxt = S.rand ? null : nextId(S.id), hasNext = !!nxt;
     const grade = !passed ? "Out of time" : right === total ? "Five stars" : S.rand ? "Shift survived" : "Scenario cleared";
     stage.innerHTML = `<div class="card">
       <div class="card-head"><span>${S.scen.name}</span><span>${right}/${total}</span></div>
@@ -365,8 +391,8 @@ function render() {
       stage.innerHTML += `<p class="hint">${passed ? "" : "The peek ran out. "}Random shifts don't count toward unlocks.</p>`;
       go.textContent = "Another random shift";
     } else {
-    stage.innerHTML += `<p class="hint">${passed ? (hasNext ? `Unlocked: ${SCENARIOS[nxt].name}.` : S.scen.ladder ? "You've cleared the whole ladder." : "Twist cleared.") : `The peek ran out on order ${S.history.length} of ${ORDERS}. Same foods, try again.`}</p>`;
-    go.textContent = passed && hasNext ? `Next: ${SCENARIOS[nxt].name}` : passed ? "Back to modes" : "Try again";
+    stage.innerHTML += `<p class="hint">${passed ? `${tierCleared(S.scen.t)}/6 cleared in ${TIERS[S.scen.t].name}.` : `The peek ran out on order ${S.history.length} of ${ORDERS}. Same orders, try again.`}</p>`;
+    go.textContent = passed && hasNext ? `Next: ${scenOf(nxt).name}` : passed ? "Back to scenarios" : "Try again";
     S.next = nxt;
     }
   }
@@ -397,20 +423,25 @@ go.addEventListener("click", () => {
     if (S.peek <= 0) { S.phase = "end"; S.lost = true; }
     else if (S.round >= ORDERS) {
       S.phase = "end"; S.lost = false;
-      if (!S.rand && !isCleared(S.sc)) { progress.cleared.push(S.scen.name); saveProgress(); }
+      if (!S.rand && !isCleared(S.id)) { progress.cleared.push(S.id); saveProgress(); }
     } else dealRound();
     render();
   } else if (S.phase === "end") {
     if (S.rand) startScenario("random");
-    else if (S.passed && S.next >= 0) startScenario(S.next);
-    else if (S.passed) openMenu();
-    else startScenario(S.sc);
+    else if (S.passed && S.next) startScenario(S.next);
+    else if (S.passed) openMenu(S.scen.t);
+    else startScenario(S.id);
     render();
   }
 });
 stage.addEventListener("click", e => {
-  const sc = e.target.closest(".scen");
-  if (sc && S.phase === "menu") { startScenario(sc.dataset.sc === "random" ? "random" : +sc.dataset.sc); render(); return; }
+  if (S.phase === "menu") {
+    const tier = e.target.closest(".tier"), sc = e.target.closest("[data-sc]"), back = e.target.closest(".back");
+    if (tier) { openMenu(+tier.dataset.tier); render(); }
+    else if (sc) { startScenario(sc.dataset.sc); render(); }
+    else if (back) { openMenu(); render(); }
+    return;
+  }
   const b = e.target.closest(".row.checkable");
   if (!b || S.phase !== "check") return;
   const i = +b.dataset.i; S.marks[i] = !S.marks[i]; render();
@@ -418,9 +449,10 @@ stage.addEventListener("click", e => {
 });
 let armed = false;
 $("restart").addEventListener("click", e => {
-  if (S.phase === "end") { openMenu(); render(); return; }
+  const home = () => openMenu(S.rand ? null : S.scen.t);
+  if (S.phase === "end") { home(); render(); return; }
   if (!armed) { armed = true; e.target.textContent = "Tap to confirm"; setTimeout(() => { armed = false; e.target.textContent = "Menu"; }, 2500); return; }
-  armed = false; e.target.textContent = "Menu"; openMenu(); render();
+  armed = false; e.target.textContent = "Menu"; home(); render();
 });
 openMenu(); render();
 </script>
