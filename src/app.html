@@ -236,8 +236,10 @@ function makeOrder(len, rnd) {
     const f = KEYS[rnd() * KEYS.length | 0];
     if ((used[f] || 0) >= 2) continue;
     used[f] = (used[f] || 0) + 1;
-    order.push({ food: f, edge: rnd() < 0.5 });
+    order.push({ food: f, edge: false });
   }
+  // standing pieces are near impossible to build on, so the only one allowed is a cap on top (about half the orders)
+  if (rnd() < 0.5) order[order.length - 1].edge = true;
   return order;
 }
 
