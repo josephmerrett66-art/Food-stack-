@@ -213,25 +213,21 @@ const img = (food, alt = "") => `<img src="${art(food)[0]}" alt="${alt}">`;
 
 const PLAYERS = { joe: { name: "Joe", color: "var(--joe)" }, beth: { name: "Beth", color: "var(--beth)" } };
 // Sky Team style: pick a difficulty, then one of six fixed scenarios in it.
+// Every scenario ramps up: an easy first order climbing to a hard last one (difficulty sets the range).
 // Every scenario starts at the same peek; difficulty comes only from stack height.
 // Each scenario's orders are fixed (seeded), so replays are the same orders you can learn.
 const START_PEEK = 6, ORDERS = 6;
 const TIERS = [
-  { name: "Easy", range: "7–8 high", color: "#3f9a57", list: [
-    ["Morning Coffee", [7, 7, 7, 7, 8, 8]], ["School Pickup", [7, 8, 7, 8, 7, 8]], ["Farmers Market", [8, 8, 7, 7, 7, 7]],
-    ["Beach Car Park", [7, 7, 8, 7, 7, 8]], ["Sausage Sizzle", [7, 8, 8, 7, 8, 8]], ["Sunday Brunch", [8, 7, 8, 8, 7, 8]] ] },
-  { name: "Medium", range: "8–9 high", color: "#e9b62f", list: [
-    ["Lunch Rush", [8, 8, 8, 9, 9, 9]], ["Office Park", [8, 9, 8, 9, 8, 9]], ["Rainy Day", [9, 9, 8, 8, 8, 8]],
-    ["Uni Open Day", [8, 8, 9, 8, 9, 9]], ["Car Show", [9, 8, 9, 9, 8, 9]], ["Twilight Cinema", [8, 9, 9, 9, 9, 9]] ] },
-  { name: "Hard", range: "8–10 high", color: "#ff8a3d", list: [
-    ["Festival Friday", [8, 9, 9, 10, 10, 10]], ["Night Market", [9, 8, 10, 8, 10, 9]], ["Wedding Reception", [10, 10, 9, 9, 8, 8]],
-    ["Stadium Gates", [9, 9, 9, 10, 9, 10]], ["Long Weekend", [8, 10, 8, 10, 8, 10]], ["Heatwave", [9, 10, 10, 9, 10, 10]] ] },
-  { name: "Expert", range: "9–11 high", color: "#e2372f", list: [
-    ["Late Night Queue", [9, 9, 10, 10, 11, 11]], ["Grand Final Day", [10, 9, 11, 9, 11, 10]], ["New Year's Eve", [11, 11, 10, 10, 9, 9]],
-    ["Music Festival", [10, 10, 10, 11, 10, 11]], ["Food Truck Rally", [9, 11, 9, 11, 9, 11]], ["Closing Time", [10, 11, 11, 10, 11, 11]] ] },
-  { name: "Nightmare", range: "10–11 high", color: "#8b2bb0", list: [
-    ["Nightmare Shift", [10, 10, 11, 11, 11, 11]], ["Health Inspection", [11, 10, 11, 10, 11, 11]], ["Power Outage", [11, 11, 11, 10, 10, 10]],
-    ["Royal Visit", [10, 11, 11, 11, 11, 11]], ["Double Booking", [11, 10, 11, 11, 10, 11]], ["The Last Sausage", [11, 11, 11, 11, 11, 11]] ] }
+  { name: "Easy", range: "5 → 9 high", color: "#3f9a57", list: [
+    ["Morning Coffee", [5, 6, 6, 7, 8, 9]], ["School Pickup", [5, 5, 6, 6, 7, 9]], ["Farmers Market", [5, 7, 7, 7, 8, 9]], ["Beach Car Park", [5, 6, 8, 6, 8, 9]], ["Sausage Sizzle", [5, 5, 7, 7, 9, 9]], ["Sunday Brunch", [5, 5, 5, 6, 7, 9]] ] },
+  { name: "Medium", range: "6 → 10 high", color: "#e9b62f", list: [
+    ["Lunch Rush", [6, 7, 7, 8, 9, 10]], ["Office Park", [6, 6, 7, 7, 8, 10]], ["Rainy Day", [6, 8, 8, 8, 9, 10]], ["Uni Open Day", [6, 7, 9, 7, 9, 10]], ["Car Show", [6, 6, 8, 8, 10, 10]], ["Twilight Cinema", [6, 6, 6, 7, 8, 10]] ] },
+  { name: "Hard", range: "7 → 11 high", color: "#ff8a3d", list: [
+    ["Festival Friday", [7, 8, 8, 9, 10, 11]], ["Night Market", [7, 7, 8, 8, 9, 11]], ["Wedding Reception", [7, 9, 9, 9, 10, 11]], ["Stadium Gates", [7, 8, 10, 8, 10, 11]], ["Long Weekend", [7, 7, 9, 9, 11, 11]], ["Heatwave", [7, 7, 7, 8, 9, 11]] ] },
+  { name: "Expert", range: "8 → 12 high", color: "#e2372f", list: [
+    ["Late Night Queue", [8, 9, 9, 10, 11, 12]], ["Grand Final Day", [8, 8, 9, 9, 10, 12]], ["New Year's Eve", [8, 10, 10, 10, 11, 12]], ["Music Festival", [8, 9, 11, 9, 11, 12]], ["Food Truck Rally", [8, 8, 10, 10, 12, 12]], ["Closing Time", [8, 8, 8, 9, 10, 12]] ] },
+  { name: "Nightmare", range: "9 → 12 high", color: "#8b2bb0", list: [
+    ["Nightmare Shift", [9, 10, 10, 11, 12, 12]], ["Health Inspection", [9, 9, 10, 11, 12, 12]], ["Power Outage", [9, 11, 11, 11, 12, 12]], ["Royal Visit", [9, 10, 12, 10, 12, 12]], ["Double Booking", [9, 9, 11, 11, 12, 12]], ["The Last Sausage", [9, 9, 9, 10, 12, 12]] ] }
 ];
 const scenOf = id => { const [t, i] = id.split("-").map(Number); const [name, stacks] = TIERS[t].list[i]; return { id, t, i, name, stacks }; };
 const nextId = id => { const { t, i } = scenOf(id); return i < 5 ? `${t}-${i + 1}` : t < TIERS.length - 1 ? `${t + 1}-0` : null; };
@@ -261,7 +257,7 @@ function makeOrder(len, rnd) {
 function openMenu(tier = null) { cancelAnimationFrame(raf); S = { phase: "menu", tier }; }
 function startScenario(id) {
   const rand = id === "random";
-  const sc = rand ? { name: "Random shift", stacks: Array.from({ length: ORDERS }, () => 7 + (Math.random() * 5 | 0)) } : scenOf(id);
+  const sc = rand ? { name: "Random shift", stacks: Array.from({ length: ORDERS }, () => 6 + (Math.random() * 6 | 0)).sort((x, y) => x - y) } : scenOf(id);
   const deck = shuffle(KEYS);
   // the split is rolled once per run and kept for all six orders
   S = { id, rand, scen: sc, round: 0, peek: START_PEEK, phase: "ready", history: [], lastPenalty: null, split: { joe: deck.slice(0, 3), beth: deck.slice(3) } };
@@ -348,8 +344,8 @@ function scenCard(t, i) {
   return `<button class="scard${done ? " done" : ""}" type="button" data-sc="${id}" style="--tc:${TIERS[t].color}">
     <span class="shead"><span class="snum">${i + 1}</span>${done ? '<span class="tick">✓</span>' : ""}</span>
     <b>${name}</b>
-    <span class="bars" aria-label="Stack heights ${stacks.join(", ")}">${stacks.map(h => `<i style="height:${(h - 2) / 6 * 100}%"></i>`).join("")}</span>
-    <span class="hrange">${Math.min(...stacks)}–${Math.max(...stacks)} high</span>
+    <span class="bars" aria-label="Stack heights ${stacks.join(", ")}">${stacks.map(h => `<i style="height:${(h - 3) / 9 * 100}%"></i>`).join("")}</span>
+    <span class="hrange">${stacks[0]} → ${stacks[ORDERS - 1]} high</span>
   </button>`;
 }
 const $ = id => document.getElementById(id);
@@ -369,7 +365,7 @@ function render() {
       <div class="menu">${TIERS.map((_, t) => tierRow(t)).join("")}
       <button class="scen random" type="button" data-sc="random">
         <span class="snum">?</span>
-        <span class="sname"><b>Random shift</b><span>7–11 high · different every time</span></span>
+        <span class="sname"><b>Random shift</b><span>Climbs from 6 to 11 high · different every time</span></span>
         <span class="sbadge">Play</span>
       </button></div>
       <p class="menu-note">Every scenario starts with a ${START_PEEK}-second peek. Each wrong piece takes a second off it. If it hits zero, you lose. Survive all six orders to clear the scenario.</p>

@@ -14,15 +14,17 @@ A one-screen companion app for **Food Van**, a two-player co-op memory and dexte
 
 Like Sky Team, you pick a difficulty and then one of six scenarios inside it. Every scenario starts with the same 6-second peek; difficulty comes only from stack height. Each scenario always deals the same six orders, so you can replay it and learn it. All scenarios are open from the start.
 
-| Difficulty | Stack heights | Scenarios |
-|---|---|---|
-| Easy | 7–8 | Morning Coffee, School Pickup, Farmers Market, Beach Car Park, Sausage Sizzle, Sunday Brunch |
-| Medium | 8–9 | Lunch Rush, Office Park, Rainy Day, Uni Open Day, Car Show, Twilight Cinema |
-| Hard | 8–10 | Festival Friday, Night Market, Wedding Reception, Stadium Gates, Long Weekend, Heatwave |
-| Expert | 9–11 | Late Night Queue, Grand Final Day, New Year's Eve, Music Festival, Food Truck Rally, Closing Time |
-| Nightmare | 10–11 | Nightmare Shift, Health Inspection, Power Outage, Royal Visit, Double Booking, The Last Sausage |
+Every scenario **ramps up**: the first order is short enough to feel easy, and the stacks climb to a hard final order. The difficulty sets where the ramp starts and ends, and each of the six scenarios climbs its own way (steady, in steps, a plateau, a mid-shift spike, in pairs, or a late surge). The shrinking peek stacks on top: slip early and you face the tallest orders with the least time.
 
-**Random shift** rolls a fresh stack height from 7 to 11 for every order, and new orders every time.
+| Difficulty | Order 1 → Order 6 | Scenarios |
+|---|---|---|
+| Easy | 5 → 9 | Morning Coffee, School Pickup, Farmers Market, Beach Car Park, Sausage Sizzle, Sunday Brunch |
+| Medium | 6 → 10 | Lunch Rush, Office Park, Rainy Day, Uni Open Day, Car Show, Twilight Cinema |
+| Hard | 7 → 11 | Festival Friday, Night Market, Wedding Reception, Stadium Gates, Long Weekend, Heatwave |
+| Expert | 8 → 12 | Late Night Queue, Grand Final Day, New Year's Eve, Music Festival, Food Truck Rally, Closing Time |
+| Nightmare | 9 → 12 | Nightmare Shift, Health Inspection, Power Outage, Royal Visit, Double Booking, The Last Sausage |
+
+**Random shift** rolls six random heights from 6 to 11 and plays them shortest first, with new orders every time.
 
 ## Files
 
