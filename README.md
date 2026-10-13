@@ -18,7 +18,7 @@ Every scenario **ramps up**: the first order is short enough to feel easy, and t
 
 | Difficulty | Order 1 → Order 6 | Scenarios |
 |---|---|---|
-| Easy | 5 → 9 | Morning Coffee, School Pickup, Farmers Market, Beach Car Park, Sausage Sizzle, Sunday Brunch |
+| Easy | 6 → 7 | Morning Coffee, School Pickup, Farmers Market, Beach Car Park, Sausage Sizzle, Sunday Brunch |
 | Medium | 6 → 10 | Lunch Rush, Office Park, Rainy Day, Uni Open Day, Car Show, Twilight Cinema |
 | Hard | 7 → 11 | Festival Friday, Night Market, Wedding Reception, Stadium Gates, Long Weekend, Heatwave |
 | Expert | 8 → 12 | Late Night Queue, Grand Final Day, New Year's Eve, Music Festival, Food Truck Rally, Closing Time |
