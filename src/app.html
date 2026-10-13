@@ -1,0 +1,389 @@
+<title>Food Van Shift</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600;700&family=Nunito+Sans:opsz,wght@6..12,600;6..12,800&display=swap">
+<style>
+/* Layout: navy frame, one cream order card. Order = isometric stack on the plate (left) + numbered list (right),
+   matching Joe's cheat-sheet mockup. Single look by choice; every colour set explicitly. */
+:root {
+  --frame: #1d2532;
+  --frame-2: #273142;
+  --card: #fbf3e1;
+  --well: #f3e7cf;
+  --row: #efe2c7;
+  --ink: #161b24;
+  --ink-soft: #6d6455;
+  --mist: #9aa5b8;
+  --joe: #e9b62f;
+  --beth: #e2372f;
+  --go: #ff8a3d;
+  --good: #3f9a57;
+  --display: "Pixelify Sans", "Courier New", monospace;
+  --body: "Nunito Sans", system-ui, sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--frame); color: var(--card); font-family: var(--body); }
+.app {
+  height: 100%; max-width: 620px; margin: 0 auto; box-sizing: border-box;
+  padding: 12px 16px 16px; display: grid; grid-template-rows: auto 1fr auto; gap: 12px;
+}
+
+/* header */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 1.3rem; text-transform: uppercase; letter-spacing: .02em; }
+.brand .tag { background: var(--card); color: var(--ink); padding: 2px 8px; font-size: 1rem; }
+.stats { display: flex; align-items: stretch; gap: 8px; }
+.stat { background: var(--frame-2); padding: 5px 9px; text-align: center; min-width: 46px; }
+.stat b { display: block; font-family: var(--display); font-weight: 700; font-size: 1.15rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat span { font-family: var(--display); font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--mist); }
+.stat.peek b { color: var(--go); }
+.restart { background: none; border: 2px solid var(--frame-2); color: var(--mist); font: 600 .68rem var(--display); letter-spacing: .08em; text-transform: uppercase; padding: 4px 8px; cursor: pointer; }
+
+/* stage */
+.stage { min-height: 0; overflow: auto; display: flex; flex-direction: column; justify-content: center; gap: 12px; }
+.card { background: var(--card); color: var(--ink); border-radius: 10px; padding: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-family: var(--display); font-weight: 700; text-transform: uppercase; font-size: 1.35rem; line-height: 1; padding: 2px 2px 10px; }
+.card-head .sep { display: flex; align-items: center; gap: 12px; }
+.card-head .sep i { width: 2px; align-self: stretch; background: #dccdb0; }
+.count { font-variant-numeric: tabular-nums; color: var(--go); min-width: 1.4em; text-align: right; }
+
+.order { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 10px; align-items: stretch; }
+.stackbox { background: var(--well); border-radius: 8px; min-height: 240px; position: relative; }
+.stackbox svg { position: absolute; inset: 6px; width: calc(100% - 12px); height: calc(100% - 12px); }
+.list { display: flex; flex-direction: column-reverse; gap: 5px; }
+.row {
+  display: grid; grid-template-columns: 26px 50px minmax(0, 1fr) auto; align-items: center; gap: 6px;
+  background: var(--row); border-radius: 7px; padding: 4px 6px; border: 0; color: inherit; font: inherit; text-align: left; width: 100%;
+}
+.num { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--owner); color: var(--ink); border: 2px solid var(--ink); font: 700 .85rem var(--display); }
+.num.beth { color: #fff; }
+.row img { width: 50px; height: 38px; object-fit: contain; display: block; }
+.row .lbl { min-width: 0; display: grid; line-height: 1.05; }
+.row .lbl b { font: 700 .92rem var(--display); }
+.row .lbl span { font: 600 .66rem var(--display); letter-spacing: .06em; text-transform: uppercase; }
+.row.edge .lbl span { color: #fff; background: var(--ink); justify-self: start; padding: 1px 5px; margin-top: 2px; }
+.row.flat .lbl span { color: var(--ink); border: 2px solid var(--ink); justify-self: start; padding: 0 5px; margin-top: 2px; }
+.row.checkable { cursor: pointer; }
+.order.tall .list { gap: 3px; }
+.order.tall .row { padding: 2px 6px; }
+.order.tall .row img { height: 30px; }
+.order.tall .num { width: 22px; height: 22px; font-size: .78rem; }
+.mark { width: 22px; height: 22px; display: grid; place-items: center; font: 700 .9rem var(--display); color: #fff; background: var(--good); border-radius: 4px; }
+.row.wrong .mark { background: var(--beth); }
+.row.wrong img, .row.wrong .lbl { opacity: .35; }
+
+.peekbar { height: 8px; background: #e6d8bb; border-radius: 4px; overflow: hidden; margin-top: 10px; }
+.peekbar i { display: block; height: 100%; background: var(--go); transform-origin: left; }
+.result { display: flex; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 2px dashed #dccdb0; font: 600 .85rem var(--display); text-transform: uppercase; color: var(--ink-soft); }
+.result b { color: var(--ink); }
+.result b.out { color: var(--beth); }
+.hint { text-align: center; font-size: .8rem; color: var(--mist); margin: 0; }
+
+/* scenario menu */
+.menu { display: grid; gap: 6px; }
+.scen { display: grid; grid-template-columns: 30px minmax(0,1fr) auto; align-items: center; gap: 10px; background: var(--row); border: 0; border-radius: 8px; padding: 9px 10px; color: var(--ink); font: inherit; text-align: left; cursor: pointer; width: 100%; }
+.scen .snum { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; border: 2px solid var(--ink); font: 700 .95rem var(--display); background: var(--card); }
+.scen .sname { display: grid; line-height: 1.15; min-width: 0; }
+.scen .sname b { font: 700 1.05rem var(--display); text-transform: uppercase; }
+.scen .sname span { font-size: .78rem; color: var(--ink-soft); }
+.scen .sbadge { font: 700 .72rem var(--display); letter-spacing: .08em; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; background: var(--go); color: var(--ink); }
+.scen.random { background: var(--frame-2); color: var(--card); margin-top: 4px; }
+.scen.random .sname span { color: var(--mist); }
+.scen.random .snum { background: var(--go); }
+.scen.locked { cursor: default; opacity: .5; }
+.scen.locked .sbadge { background: none; border: 2px solid var(--ink-soft); color: var(--ink-soft); }
+.scen:focus-visible { outline: 3px solid var(--go); outline-offset: 2px; }
+.menu-note { margin: 10px 2px 2px; font-size: .8rem; color: var(--ink-soft); }
+
+/* stations */
+.stations { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.station { background: var(--card); color: var(--ink); border-radius: 10px; overflow: hidden; min-width: 0; }
+.station h3 { margin: 0; padding: 6px 10px; background: var(--c); color: var(--sc, var(--ink)); font: 700 1.05rem var(--display); text-transform: uppercase; display: flex; justify-content: space-between; align-items: baseline; }
+.station h3 span { font-size: .62rem; letter-spacing: .08em; }
+.station ul { list-style: none; margin: 0; padding: 8px; display: grid; gap: 4px; }
+.station li { display: flex; align-items: center; gap: 8px; font: 700 .9rem var(--display); }
+.station li img { width: 48px; height: 36px; object-fit: contain; }
+.stations.compact li img { width: 34px; height: 26px; }
+.stations.compact li { font-size: .78rem; }
+.stations.compact ul { padding: 6px; gap: 2px; }
+
+.callout { text-align: center; display: grid; gap: 4px; }
+.callout .k { font: 600 .7rem var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--mist); }
+.callout .v { font: 700 3.2rem/1 var(--display); color: var(--go); font-variant-numeric: tabular-nums; }
+.callout .note { font-size: .88rem; color: var(--mist); }
+.callout .note b { color: var(--beth); }
+.callout .note b.ok { color: #6cc483; }
+
+.facedown {
+  border-radius: 10px; padding: 28px 18px; text-align: center; display: grid; gap: 8px;
+  background: repeating-linear-gradient(45deg, var(--frame-2) 0 12px, #2c374a 12px 24px); border: 2px dashed #3b4860;
+}
+.facedown .big { font: 700 2.3rem/1 var(--display); text-transform: uppercase; }
+.facedown p { margin: 0; color: var(--mist); }
+.hush { justify-self: center; display: inline-flex; align-items: center; gap: 8px; font: 600 .78rem var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--go); }
+.hush::before { content: ""; width: 8px; height: 8px; background: var(--go); animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+.summary { display: grid; gap: 4px; font: 600 .9rem var(--display); }
+.srow { display: grid; grid-template-columns: auto 1fr auto auto; gap: 10px; align-items: center; padding: 6px 4px; border-bottom: 2px dashed #e3d5b8; }
+.srow:last-child { border-bottom: 0; }
+.dots { display: flex; gap: 3px; flex-wrap: wrap; }
+.dots i { width: 10px; height: 10px; background: var(--good); }
+.dots i.x { background: var(--beth); }
+.grade { font: 700 2.1rem/1.05 var(--display); text-align: center; margin: 4px 0 10px; text-transform: uppercase; text-wrap: balance; }
+
+.btn { width: 100%; border: 0; cursor: pointer; padding: 17px 16px; border-radius: 10px; font: 700 1.35rem var(--display); text-transform: uppercase; letter-spacing: .03em; background: var(--go); color: var(--ink); box-shadow: 0 5px 0 #b65a1f; transition: transform .06s, box-shadow .06s; }
+.btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #b65a1f; }
+.btn.ghost { background: var(--frame-2); color: var(--mist); box-shadow: 0 5px 0 #121821; }
+.btn:focus-visible, .row:focus-visible, .restart:focus-visible { outline: 3px solid var(--go); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .hush::before { animation: none; } .btn { transition: none; } }
+@media (max-width: 380px) { .row { grid-template-columns: 24px 42px minmax(0,1fr) auto; } .row img { width: 42px; height: 32px; } .row .lbl b { font-size: .82rem; } .row .lbl span { font-size: .58rem; } }
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand"><span class="tag" id="orderTag">1</span>Food Van</div>
+    <div class="stats">
+      <div class="stat"><b id="orderNo">1/5</b><span>order</span></div>
+      <div class="stat peek"><b id="peekNo">6s</b><span>peek</span></div>
+      <button class="restart" id="restart" type="button">Menu</button>
+    </div>
+  </header>
+  <main class="stage" id="stage" aria-live="polite"></main>
+  <button class="btn" id="go" type="button">Start</button>
+</div>
+
+<script>
+// Piece art cut from Joe's cheat sheet: [dataURI, width, height] for flat and on-long-edge.
+const ART = /*SPRITES*/;
+const FOODS = {
+  patty: "Patty", steak: "Steak", hotdog: "Hot dog", bacon: "Bacon", fish: "Fish", drumstick: "Drumstick"
+};
+const KEYS = Object.keys(FOODS);
+const art = (food, edge) => ART[food][edge ? "edge" : "flat"];
+const img = (food, edge, alt = "") => `<img src="${art(food, edge)[0]}" alt="${alt}">`;
+
+const PLAYERS = { joe: { name: "Joe", color: "var(--joe)" }, beth: { name: "Beth", color: "var(--beth)" } };
+// Scenario ladder: all six foods every time; only stack heights and starting peek change.
+const SCENARIOS = [
+  { name: "Lunch Rush",       stacks: [5, 5, 6, 6, 6, 7], peek: 5 },
+  { name: "Market Day",       stacks: [5, 6, 6, 7, 7, 7], peek: 4 },
+  { name: "Festival Friday",  stacks: [6, 6, 7, 7, 7, 8], peek: 4 },
+  { name: "Late Night Queue", stacks: [6, 7, 7, 8, 8, 8], peek: 3 },
+  { name: "Nightmare Shift",  stacks: [7, 8, 8, 8, 8, 8], peek: 3 }
+];
+const ORDERS = 6;
+let raf = 0, S, progress = { cleared: [] };
+try { progress = JSON.parse(localStorage.getItem("foodvan-progress")) || progress; } catch (e) {}
+const saveProgress = () => { try { localStorage.setItem("foodvan-progress", JSON.stringify(progress)); } catch (e) {} };
+const unlocked = i => i === 0 || progress.cleared.includes(i - 1);
+
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const ownerOf = food => S.split.joe.includes(food) ? "joe" : "beth";
+
+function openMenu() { cancelAnimationFrame(raf); S = { phase: "menu" }; }
+function startScenario(si) {
+  const rand = si === "random";
+  // a random shift rolls fresh stack heights (3-7) every time, so you never know what's coming
+  const sc = rand ? { name: "Random shift", stacks: Array.from({ length: ORDERS }, () => 5 + (Math.random() * 4 | 0)), peek: 5 } : SCENARIOS[si];
+  const deck = shuffle(KEYS);
+  // the split is rolled once per run and kept for all six orders
+  S = { sc: si, rand, scen: sc, round: 0, peek: sc.peek, phase: "ready", history: [], lastPenalty: null, split: { joe: deck.slice(0, 3), beth: deck.slice(3) } };
+  dealRound();
+}
+function dealRound() {
+  const len = S.scen.stacks[S.round];
+  let order;
+  do {
+    order = []; const used = {};
+    while (order.length < len) {
+      const f = KEYS[Math.random() * KEYS.length | 0];
+      if ((used[f] || 0) >= 2) continue;
+      used[f] = (used[f] || 0) + 1;
+      order.push({ food: f, edge: Math.random() < 0.5 });
+    }
+  } while (new Set(order.map(o => ownerOf(o.food))).size < 2);
+  S.order = order; S.marks = order.map(() => true); S.phase = "ready";
+}
+
+// ---------- isometric stack (SVG, scales to its box) ----------
+function stackSVG(checkable) {
+  const SC = 1;                       // sprite units = source pixels
+  let yb = 16, placed = [];
+  S.order.forEach((o, i) => {
+    const [src, w, h] = art(o.food, o.edge);
+    placed.push({ i, o, src, w, h, x: -w / 2, y: yb - h });
+    yb -= h * (o.edge ? 0.72 : 0.40);
+  });
+  const minY = Math.min(...placed.map(p => p.y)) - 6;
+  const maxY = 44;
+  const vb = `-112 ${minY} 212 ${maxY - minY}`;
+  const plate = `
+    <ellipse cx="0" cy="24" rx="84" ry="27" fill="#b9c2cf"/>
+    <ellipse cx="0" cy="18" rx="84" ry="27" fill="#eef1f5"/>
+    <ellipse cx="0" cy="18" rx="62" ry="19" fill="#dfe4ea"/>`;
+  const pieces = placed.map(p => {
+    const wrong = checkable && !S.marks[p.i];
+    return `<image href="${p.src}" x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}" opacity="${wrong ? .3 : 1}"/>`;
+  }).join("");
+  const labels = placed.map(p => {
+    const cy = p.y + p.h * (p.o.edge ? .45 : .42);
+    const own = ownerOf(p.o.food);
+    return `<line x1="-84" y1="${cy}" x2="${p.x + 10}" y2="${cy + 4}" stroke="#8c8270" stroke-width="1.5"/>
+      <circle cx="-94" cy="${cy}" r="13" fill="${own === "joe" ? "#e9b62f" : "#e2372f"}" stroke="#161b24" stroke-width="2.5"/>
+      <text x="-94" y="${cy + 5}" text-anchor="middle" font-family="Pixelify Sans, monospace" font-weight="700" font-size="15" fill="${own === "joe" ? "#161b24" : "#fff"}">${p.i + 1}</text>`;
+  }).join("");
+  return `<svg viewBox="${vb}" preserveAspectRatio="xMidYMax meet" role="img" aria-label="Stack of ${S.order.length} pieces on the plate">${plate}${pieces}${labels}</svg>`;
+}
+
+function listHTML(checkable) {
+  return `<div class="list">${S.order.map((o, i) => {
+    const wrong = checkable && !S.marks[i];
+    const own = ownerOf(o.food);
+    const tag = checkable ? "button" : "div";
+    return `<${tag} class="row ${o.edge ? "edge" : "flat"}${checkable ? " checkable" : ""}${wrong ? " wrong" : ""}" ${checkable ? `type="button" data-i="${i}" aria-pressed="${!wrong}"` : ""}>
+      <span class="num ${own}" style="--owner:${PLAYERS[own].color}" title="${PLAYERS[own].name}">${i + 1}</span>
+      ${img(o.food, o.edge)}
+      <span class="lbl"><b>${FOODS[o.food]}</b><span>${o.edge ? "On long edge" : "Flat"}</span></span>
+      ${checkable ? `<span class="mark">${wrong ? "✕" : "✓"}</span>` : "<span></span>"}
+    </${tag}>`;
+  }).join("")}</div>`;
+}
+function orderCard(checkable, extra = "") {
+  return `<div class="card">
+    <div class="card-head"><span>Order ${S.round + 1}</span><span class="sep"><i></i><span>${S.order.length} high</span>${checkable ? "" : `<i></i><span class="count" id="count">${S.peek}</span>`}</span></div>
+    <div class="order${S.order.length >= 7 ? " tall" : ""}"><div class="stackbox">${stackSVG(checkable)}</div>${listHTML(checkable)}</div>
+    ${extra}
+  </div>`;
+}
+function stationsHTML(compact) {
+  return `<div class="stations${compact ? " compact" : ""}">${["joe", "beth"].map(p => `
+    <section class="station" style="--c:${PLAYERS[p].color};${p === "beth" ? "--sc:#fff" : ""}">
+      <h3>${PLAYERS[p].name}<span>your foods</span></h3>
+      <ul>${S.split[p].map(f => `<li>${img(f, false)}${FOODS[f]}</li>`).join("")}</ul>
+    </section>`).join("")}</div>`;
+}
+
+// ---------- render ----------
+const $ = id => document.getElementById(id);
+const stage = $("stage"), go = $("go");
+
+function render() {
+  const menu = S.phase === "menu";
+  $("orderNo").textContent = menu ? "—" : S.phase === "end" ? "Done" : `${S.round + 1}/${ORDERS}`;
+  $("orderTag").textContent = menu ? "★" : S.rand ? "?" : S.sc + 1;
+  $("peekNo").textContent = menu ? "—" : `${S.peek}s`;
+  $("restart").hidden = menu;
+  go.disabled = false; go.className = "btn"; go.hidden = false;
+
+  if (menu) {
+    stage.innerHTML = `<div class="card">
+      <div class="card-head"><span>Pick a scenario</span><span style="font-size:.8rem">6 orders each</span></div>
+      <div class="menu">${SCENARIOS.map((sc, i) => {
+        const open = unlocked(i), done = progress.cleared.includes(i);
+        return `<button class="scen${open ? "" : " locked"}" type="button" data-sc="${i}" ${open ? "" : "disabled"}>
+          <span class="snum">${i + 1}</span>
+          <span class="sname"><b>${sc.name}</b><span>${sc.stacks[0]}–${sc.stacks[ORDERS - 1]} high · ${sc.peek}s peek</span></span>
+          <span class="sbadge">${done ? "Cleared" : open ? "Play" : "Locked"}</span>
+        </button>`;
+      }).join("")}
+      <button class="scen random" type="button" data-sc="random">
+        <span class="snum">?</span>
+        <span class="sname"><b>Random shift</b><span>5–8 high · 5s peek · different every time</span></span>
+        <span class="sbadge">Play</span>
+      </button></div>
+      <p class="menu-note">Each wrong piece takes a second off your next peek. If the peek hits zero, you lose. Survive all six orders to clear a scenario and unlock the next.</p>
+    </div>`;
+    go.hidden = true;
+  } else if (S.phase === "ready") {
+    const pen = S.lastPenalty;
+    const note = pen === null ? `${S.scen.name}. These are your foods for the whole ${S.rand ? "shift" : "scenario"}.`
+      : pen === 0 ? `<b class="ok">Perfect plate.</b> Peek time holds.`
+      : `<b>−${pen}s</b> for ${pen} wrong piece${pen > 1 ? "s" : ""} last order.`;
+    stage.innerHTML = `${stationsHTML(false)}
+      <div class="callout"><span class="k">Order ${S.round + 1} · ${S.order.length} high · peek time</span><span class="v">${S.peek}s</span><span class="note">${note}</span></div>`;
+    go.textContent = `Peek · ${S.peek}s`;
+  } else if (S.phase === "peek") {
+    stage.innerHTML = orderCard(false, `<div class="peekbar"><i id="bar"></i></div>`);
+    go.textContent = "Memorise…"; go.disabled = true; go.className = "btn ghost";
+  } else if (S.phase === "build") {
+    stage.innerHTML = `<div class="facedown"><span class="hush">Silence</span><span class="big">Build it</span><p>No talking about the order. Tweezers only. Piece 1 goes on the plate first.</p></div>${stationsHTML(true)}`;
+    go.textContent = "Reveal order";
+  } else if (S.phase === "check") {
+    const wrong = S.marks.filter(m => !m).length;
+    const next = S.peek - wrong, dead = next <= 0, last = S.round === ORDERS - 1;
+    stage.innerHTML = orderCard(true, `<div class="result"><span>Right <b>${S.order.length - wrong}/${S.order.length}</b></span><span>${dead ? `Peek <b class="out">hits zero</b>` : `Peek left <b>${next}s</b>`}</span></div>`) +
+      `<p class="hint">Tap any piece you got wrong: wrong food, wrong spot or wrong pose.</p>`;
+    go.textContent = dead ? "Out of time" : last ? "Close the van" : "Next order";
+  } else {
+    const right = S.history.reduce((a, h) => a + h.right, 0), total = S.history.reduce((a, h) => a + h.len, 0);
+    const passed = !S.lost, hasNext = !S.rand && S.sc < SCENARIOS.length - 1;
+    const grade = !passed ? "Out of time" : right === total ? "Five stars" : S.rand ? "Shift survived" : "Scenario cleared";
+    stage.innerHTML = `<div class="card">
+      <div class="card-head"><span>${S.scen.name}</span><span>${right}/${total}</span></div>
+      <div class="grade">${grade}</div>
+      <div class="summary">${S.history.map((h, i) => `<div class="srow"><span>#${i + 1}</span><span class="dots">${h.marks.map(m => `<i${m ? "" : ' class="x"'}></i>`).join("")}</span><span>${h.right}/${h.len}</span><span>${h.peek}s</span></div>`).join("")}</div>
+      <div class="result"><span>${passed ? "Peek left at the end" : `Peek hit zero on order ${S.history.length}`}</span><b>${Math.max(0, S.peek)}s</b></div></div>`;
+    S.passed = passed;
+    if (S.rand) {
+      stage.innerHTML += `<p class="hint">${passed ? "" : "The peek ran out. "}Random shifts don't count toward unlocks.</p>`;
+      go.textContent = "Another random shift";
+    } else {
+    stage.innerHTML += `<p class="hint">${passed ? (hasNext ? `Unlocked: ${SCENARIOS[S.sc + 1].name}.` : "You've cleared the whole ladder.") : `The peek ran out on order ${S.history.length} of ${ORDERS}. Same foods, try again.`}</p>`;
+    go.textContent = passed && hasNext ? `Next: ${SCENARIOS[S.sc + 1].name}` : passed ? "Back to scenarios" : "Try again";
+    }
+  }
+}
+
+// ---------- flow ----------
+let wake = null;
+async function keepAwake() { try { if (!wake && navigator.wakeLock) wake = await navigator.wakeLock.request("screen"); } catch (e) {} }
+function startPeek() {
+  keepAwake();
+  S.phase = "peek"; render();
+  const dur = S.peek * 1000, t0 = performance.now(), bar = $("bar"), count = $("count");
+  const tick = now => {
+    const left = Math.max(0, dur - (now - t0));
+    bar.style.transform = `scaleX(${left / dur})`;
+    count.textContent = Math.ceil(left / 1000);
+    if (left > 0) raf = requestAnimationFrame(tick); else { S.phase = "build"; render(); }
+  };
+  raf = requestAnimationFrame(tick);
+}
+go.addEventListener("click", () => {
+  if (S.phase === "ready") startPeek();
+  else if (S.phase === "build") { S.phase = "check"; render(); }
+  else if (S.phase === "check") {
+    const wrong = S.marks.filter(m => !m).length;
+    S.history.push({ len: S.order.length, right: S.order.length - wrong, peek: S.peek, marks: S.marks.slice() });
+    S.peek -= wrong; S.lastPenalty = wrong; S.round++;
+    if (S.peek <= 0) { S.phase = "end"; S.lost = true; }
+    else if (S.round >= ORDERS) {
+      S.phase = "end"; S.lost = false;
+      if (!S.rand && !progress.cleared.includes(S.sc)) { progress.cleared.push(S.sc); saveProgress(); }
+    } else dealRound();
+    render();
+  } else if (S.phase === "end") {
+    if (S.rand) startScenario("random");
+    else if (S.passed && S.sc < SCENARIOS.length - 1) startScenario(S.sc + 1);
+    else if (S.passed) openMenu();
+    else startScenario(S.sc);
+    render();
+  }
+});
+stage.addEventListener("click", e => {
+  const sc = e.target.closest(".scen");
+  if (sc && S.phase === "menu") { startScenario(sc.dataset.sc === "random" ? "random" : +sc.dataset.sc); render(); return; }
+  const b = e.target.closest(".row.checkable");
+  if (!b || S.phase !== "check") return;
+  const i = +b.dataset.i; S.marks[i] = !S.marks[i]; render();
+  const again = stage.querySelector(`.row[data-i="${i}"]`); if (again) again.focus();
+});
+let armed = false;
+$("restart").addEventListener("click", e => {
+  if (S.phase === "end") { openMenu(); render(); return; }
+  if (!armed) { armed = true; e.target.textContent = "Tap to confirm"; setTimeout(() => { armed = false; e.target.textContent = "Menu"; }, 2500); return; }
+  armed = false; e.target.textContent = "Menu"; openMenu(); render();
+});
+openMenu(); render();
+</script>
