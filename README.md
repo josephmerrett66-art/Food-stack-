@@ -12,7 +12,7 @@ A one-screen companion app for **Food Van**, a two-player co-op memory and dexte
 
 ## Difficulties and scenarios
 
-Like Sky Team, you pick a difficulty and then one of six scenarios inside it. Every scenario starts with the same 6-second peek; difficulty comes only from stack height. Each scenario always deals the same six orders, so you can replay it and learn it. All scenarios are open from the start.
+Like Sky Team, you pick a difficulty and then one of six scenarios inside it. Every scenario starts with the same 6-second peek; difficulty comes only from stack height. Every order is split evenly between Joe and Beth (one extra for someone when the height is odd), in a shuffled order. A scenario keeps the same heights and the same who-goes-when every time you replay it; the actual foods follow that run's random split. All scenarios are open from the start.
 
 Every scenario **ramps up**: the first order is short enough to feel easy, and the stacks climb to a hard final order. The difficulty sets where the ramp starts and ends, and each of the six scenarios climbs its own way (steady, in steps, a plateau, a mid-shift spike, in pairs, or a late surge). The shrinking peek stacks on top: slip early and you face the tallest orders with the least time.
 
