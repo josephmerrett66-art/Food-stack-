@@ -56,7 +56,10 @@ body { background: var(--frame); color: var(--card); font-family: var(--body); f
 .stackbox { background: var(--well); border-radius: 8px; min-height: 240px; position: relative; }
 .stackbox svg { position: absolute; inset: 6px; width: calc(100% - 12px); height: calc(100% - 12px); }
 .list { display: flex; flex-direction: column-reverse; justify-content: flex-start; gap: 5px; min-height: 0; }
-.card.fill .row { flex: 1 1 0; max-height: 84px; min-height: 40px; }
+.card.fill .row { flex: 1 1 0; max-height: 76px; min-height: 34px; }
+.card.fill .order.tall .row { min-height: 28px; padding: 1px 6px; }
+.card.fill .order.tall .row img { height: min(34px, 100%); }
+.card.fill .order.tall .num { width: 22px; height: 22px; font-size: .75rem; }
 .row {
   display: grid; grid-template-columns: 26px 50px minmax(0, 1fr) auto; align-items: center; gap: 6px;
   background: var(--row); border-radius: 7px; padding: 4px 6px; border: 0; color: inherit; font: inherit; text-align: left; width: 100%;
@@ -67,14 +70,12 @@ body { background: var(--frame); color: var(--card); font-family: var(--body); f
 .card.fill .row img { width: 52px; height: min(48px, 100%); }
 .card.fill .row { grid-template-columns: 26px 46px minmax(0, 1fr) auto; gap: 5px; }
 .card.fill .row img { width: 46px; }
-.row .lbl b { overflow-wrap: anywhere; }
+.row .lbl b { overflow-wrap: break-word; }
+.card.fill .order.tall .row .lbl b { font-size: .85rem; }
 .row .lbl span { white-space: nowrap; }
 .row .lbl { min-width: 0; display: grid; line-height: 1.05; }
 .row .lbl b { font: 700 .92rem var(--display); }
 .row .lbl span { font: 600 .66rem var(--display); letter-spacing: .06em; text-transform: uppercase; }
-.row.turn img { transform: scaleX(-1); }
-.row.turn .lbl span { color: #fff; background: var(--ink); justify-self: start; padding: 1px 5px; margin-top: 2px; }
-.row.flat .lbl span { color: var(--ink); border: 2px solid var(--ink); justify-self: start; padding: 0 5px; margin-top: 2px; }
 .row.checkable { cursor: pointer; }
 .order.tall .list { gap: 3px; }
 .order.tall .row { padding: 2px 6px; }
@@ -189,8 +190,7 @@ body { background: var(--frame); color: var(--card); font-family: var(--body); f
 </div>
 
 <script>
-// Piece art cut from Joe's cheat sheet: [dataURI, width, height]. Every piece lies flat;
-// a "turned" piece is rotated 90 degrees on the plate, drawn as the flat art mirrored.
+// Piece art cut from Joe's cheat sheet: [dataURI, width, height]. Every piece lies flat.
 const ART = /*SPRITES*/;
 const FOODS = {
   patty: "Patty", steak: "Steak", hotdog: "Hot dog", bacon: "Bacon", fish: "Fish", drumstick: "Drumstick"
@@ -205,21 +205,21 @@ const PLAYERS = { joe: { name: "Joe", color: "var(--joe)" }, beth: { name: "Beth
 // Each scenario's orders are fixed (seeded), so replays are the same orders you can learn.
 const START_PEEK = 6, ORDERS = 6;
 const TIERS = [
-  { name: "Easy", range: "4–5 high", color: "#3f9a57", list: [
-    ["Morning Coffee", [4, 4, 4, 4, 5, 5]], ["School Pickup", [4, 5, 4, 5, 4, 5]], ["Farmers Market", [5, 5, 4, 4, 4, 4]],
-    ["Beach Car Park", [4, 4, 5, 4, 4, 5]], ["Sausage Sizzle", [4, 5, 5, 4, 5, 5]], ["Sunday Brunch", [5, 4, 5, 5, 4, 5]] ] },
-  { name: "Medium", range: "5–6 high", color: "#e9b62f", list: [
-    ["Lunch Rush", [5, 5, 5, 6, 6, 6]], ["Office Park", [5, 6, 5, 6, 5, 6]], ["Rainy Day", [6, 6, 5, 5, 5, 5]],
-    ["Uni Open Day", [5, 5, 6, 5, 6, 6]], ["Car Show", [6, 5, 6, 6, 5, 6]], ["Twilight Cinema", [5, 6, 6, 6, 6, 6]] ] },
-  { name: "Hard", range: "5–7 high", color: "#ff8a3d", list: [
-    ["Festival Friday", [5, 6, 6, 7, 7, 7]], ["Night Market", [6, 5, 7, 5, 7, 6]], ["Wedding Reception", [7, 7, 6, 6, 5, 5]],
-    ["Stadium Gates", [6, 6, 6, 7, 6, 7]], ["Long Weekend", [5, 7, 5, 7, 5, 7]], ["Heatwave", [6, 7, 7, 6, 7, 7]] ] },
-  { name: "Expert", range: "6–8 high", color: "#e2372f", list: [
-    ["Late Night Queue", [6, 6, 7, 7, 8, 8]], ["Grand Final Day", [7, 6, 8, 6, 8, 7]], ["New Year's Eve", [8, 8, 7, 7, 6, 6]],
-    ["Music Festival", [7, 7, 7, 8, 7, 8]], ["Food Truck Rally", [6, 8, 6, 8, 6, 8]], ["Closing Time", [7, 8, 8, 7, 8, 8]] ] },
-  { name: "Nightmare", range: "7–8 high", color: "#8b2bb0", list: [
-    ["Nightmare Shift", [7, 7, 8, 8, 8, 8]], ["Health Inspection", [8, 7, 8, 7, 8, 8]], ["Power Outage", [8, 8, 8, 7, 7, 7]],
-    ["Royal Visit", [7, 8, 8, 8, 8, 8]], ["Double Booking", [8, 7, 8, 8, 7, 8]], ["The Last Sausage", [8, 8, 8, 8, 8, 8]] ] }
+  { name: "Easy", range: "7–8 high", color: "#3f9a57", list: [
+    ["Morning Coffee", [7, 7, 7, 7, 8, 8]], ["School Pickup", [7, 8, 7, 8, 7, 8]], ["Farmers Market", [8, 8, 7, 7, 7, 7]],
+    ["Beach Car Park", [7, 7, 8, 7, 7, 8]], ["Sausage Sizzle", [7, 8, 8, 7, 8, 8]], ["Sunday Brunch", [8, 7, 8, 8, 7, 8]] ] },
+  { name: "Medium", range: "8–9 high", color: "#e9b62f", list: [
+    ["Lunch Rush", [8, 8, 8, 9, 9, 9]], ["Office Park", [8, 9, 8, 9, 8, 9]], ["Rainy Day", [9, 9, 8, 8, 8, 8]],
+    ["Uni Open Day", [8, 8, 9, 8, 9, 9]], ["Car Show", [9, 8, 9, 9, 8, 9]], ["Twilight Cinema", [8, 9, 9, 9, 9, 9]] ] },
+  { name: "Hard", range: "8–10 high", color: "#ff8a3d", list: [
+    ["Festival Friday", [8, 9, 9, 10, 10, 10]], ["Night Market", [9, 8, 10, 8, 10, 9]], ["Wedding Reception", [10, 10, 9, 9, 8, 8]],
+    ["Stadium Gates", [9, 9, 9, 10, 9, 10]], ["Long Weekend", [8, 10, 8, 10, 8, 10]], ["Heatwave", [9, 10, 10, 9, 10, 10]] ] },
+  { name: "Expert", range: "9–11 high", color: "#e2372f", list: [
+    ["Late Night Queue", [9, 9, 10, 10, 11, 11]], ["Grand Final Day", [10, 9, 11, 9, 11, 10]], ["New Year's Eve", [11, 11, 10, 10, 9, 9]],
+    ["Music Festival", [10, 10, 10, 11, 10, 11]], ["Food Truck Rally", [9, 11, 9, 11, 9, 11]], ["Closing Time", [10, 11, 11, 10, 11, 11]] ] },
+  { name: "Nightmare", range: "10–11 high", color: "#8b2bb0", list: [
+    ["Nightmare Shift", [10, 10, 11, 11, 11, 11]], ["Health Inspection", [11, 10, 11, 10, 11, 11]], ["Power Outage", [11, 11, 11, 10, 10, 10]],
+    ["Royal Visit", [10, 11, 11, 11, 11, 11]], ["Double Booking", [11, 10, 11, 11, 10, 11]], ["The Last Sausage", [11, 11, 11, 11, 11, 11]] ] }
 ];
 const scenOf = id => { const [t, i] = id.split("-").map(Number); const [name, stacks] = TIERS[t].list[i]; return { id, t, i, name, stacks }; };
 const nextId = id => { const { t, i } = scenOf(id); return i < 5 ? `${t}-${i + 1}` : t < TIERS.length - 1 ? `${t + 1}-0` : null; };
@@ -241,7 +241,7 @@ function makeOrder(len, rnd) {
     const f = KEYS[rnd() * KEYS.length | 0];
     if ((used[f] || 0) >= 2) continue;
     used[f] = (used[f] || 0) + 1;
-    order.push({ food: f, turn: rnd() < 0.5 });
+    order.push({ food: f });
   }
   return order;
 }
@@ -249,7 +249,7 @@ function makeOrder(len, rnd) {
 function openMenu(tier = null) { cancelAnimationFrame(raf); S = { phase: "menu", tier }; }
 function startScenario(id) {
   const rand = id === "random";
-  const sc = rand ? { name: "Random shift", stacks: Array.from({ length: ORDERS }, () => 4 + (Math.random() * 5 | 0)) } : scenOf(id);
+  const sc = rand ? { name: "Random shift", stacks: Array.from({ length: ORDERS }, () => 7 + (Math.random() * 5 | 0)) } : scenOf(id);
   const deck = shuffle(KEYS);
   // the split is rolled once per run and kept for all six orders
   S = { id, rand, scen: sc, round: 0, peek: START_PEEK, phase: "ready", history: [], lastPenalty: null, split: { joe: deck.slice(0, 3), beth: deck.slice(3) } };
@@ -274,7 +274,7 @@ function stackSVG(checkable) {
   });
   const minY = Math.min(...placed.map(p => p.y)) - 6;
   const maxY = 44;
-  const maxX = Math.max(84, ...placed.map(p => p.x + p.w + (p.o.turn ? 26 : 0))) + 4;
+  const maxX = Math.max(84, ...placed.map(p => p.x + p.w)) + 4;
   const vb = `-110 ${minY} ${110 + maxX} ${maxY - minY}`;
   const plate = `
     <ellipse cx="0" cy="24" rx="84" ry="27" fill="#b9c2cf"/>
@@ -282,16 +282,14 @@ function stackSVG(checkable) {
     <ellipse cx="0" cy="18" rx="62" ry="19" fill="#dfe4ea"/>`;
   const pieces = placed.map(p => {
     const wrong = checkable && !S.marks[p.i];
-    return `<image href="${p.src}" x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}" opacity="${wrong ? .3 : 1}"${p.o.turn ? ' transform="scale(-1 1)"' : ""}/>`;
+    return `<image href="${p.src}" x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}" opacity="${wrong ? .3 : 1}"/>`;
   }).join("");
   const labels = placed.map(p => {
     const cy = p.y + p.h * .42;
     const own = ownerOf(p.o.food);
     return `<line x1="-84" y1="${cy}" x2="${p.x + 10}" y2="${cy + 4}" stroke="#8c8270" stroke-width="1.5"/>
       <circle cx="-94" cy="${cy}" r="13" fill="${own === "joe" ? "#e9b62f" : "#e2372f"}" stroke="#161b24" stroke-width="2.5"/>
-      <text x="-94" y="${cy + 5}" text-anchor="middle" font-family="Pixelify Sans, monospace" font-weight="700" font-size="15" fill="${own === "joe" ? "#161b24" : "#fff"}">${p.i + 1}</text>${p.o.turn ? `
-      <rect x="${p.w / 2 + 2}" y="${cy - 11}" width="22" height="22" rx="5" fill="#161b24"/>
-      <text x="${p.w / 2 + 13}" y="${cy + 6}" text-anchor="middle" font-family="Pixelify Sans, sans-serif" font-weight="700" font-size="16" fill="#fff">↻</text>` : ""}`;
+      <text x="-94" y="${cy + 5}" text-anchor="middle" font-family="Pixelify Sans, monospace" font-weight="700" font-size="15" fill="${own === "joe" ? "#161b24" : "#fff"}">${p.i + 1}</text>`;
   }).join("");
   return `<svg viewBox="${vb}" preserveAspectRatio="xMidYMax meet" role="img" aria-label="Stack of ${S.order.length} pieces on the plate">${plate}${pieces}${labels}</svg>`;
 }
@@ -301,10 +299,10 @@ function listHTML(checkable) {
     const wrong = checkable && !S.marks[i];
     const own = ownerOf(o.food);
     const tag = checkable ? "button" : "div";
-    return `<${tag} class="row ${o.turn ? "turn" : "flat"}${checkable ? " checkable" : ""}${wrong ? " wrong" : ""}" ${checkable ? `type="button" data-i="${i}" aria-pressed="${!wrong}"` : ""}>
+    return `<${tag} class="row${checkable ? " checkable" : ""}${wrong ? " wrong" : ""}" ${checkable ? `type="button" data-i="${i}" aria-pressed="${!wrong}"` : ""}>
       <span class="num ${own}" style="--owner:${PLAYERS[own].color}" title="${PLAYERS[own].name}">${i + 1}</span>
       ${img(o.food)}
-      <span class="lbl"><b>${FOODS[o.food]}</b><span>${o.turn ? "Turned ↻" : "Straight"}</span></span>
+      <span class="lbl"><b>${FOODS[o.food]}</b></span>
       ${checkable ? `<span class="mark">${wrong ? "✕" : "✓"}</span>` : "<span></span>"}
     </${tag}>`;
   }).join("")}</div>`;
@@ -312,7 +310,7 @@ function listHTML(checkable) {
 function orderCard(checkable, extra = "") {
   return `<div class="card fill">
     <div class="card-head"><span>Order ${S.round + 1}</span><span class="sep"><i></i><span>${S.order.length} high</span>${checkable ? "" : `<i></i><span class="count" id="count">${S.peek}</span>`}</span></div>
-    <div class="order${S.order.length >= 7 ? " tall" : ""}"><div class="stackbox">${stackSVG(checkable)}</div>${listHTML(checkable)}</div>
+    <div class="order${S.order.length >= 9 ? " tall" : ""}"><div class="stackbox">${stackSVG(checkable)}</div>${listHTML(checkable)}</div>
     ${extra}
   </div>`;
 }
@@ -359,7 +357,7 @@ function render() {
       <div class="menu">${TIERS.map((_, t) => tierRow(t)).join("")}
       <button class="scen random" type="button" data-sc="random">
         <span class="snum">?</span>
-        <span class="sname"><b>Random shift</b><span>4–8 high · different every time</span></span>
+        <span class="sname"><b>Random shift</b><span>7–11 high · different every time</span></span>
         <span class="sbadge">Play</span>
       </button></div>
       <p class="menu-note">Every scenario starts with a ${START_PEEK}-second peek. Each wrong piece takes a second off it. If it hits zero, you lose. Survive all six orders to clear the scenario.</p>

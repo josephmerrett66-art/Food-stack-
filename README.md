@@ -5,7 +5,7 @@ A one-screen companion app for **Food Van**, a two-player co-op memory and dexte
 ## How a shift works
 
 1. Pick a difficulty and a scenario (or a Random shift). The six foods are split randomly between Joe and Beth once, and each player keeps their three foods for the whole run.
-2. Tap **Peek** to see the order: an isometric stack on the plate, numbered from the bottom up, with every piece lying flat, either **Straight** or **Turned ↻** (rotated 90 degrees on the plate). Any piece in the stack can be turned.
+2. Tap **Peek** to see the order: an isometric stack on the plate, numbered from the bottom up, with every piece lying flat.
 3. When the peek runs out the order hides. No talking about the order. Build it with tweezers, piece 1 on the plate first.
 4. Tap **Reveal order**, then tap any piece you got wrong.
 5. Every mode starts with a **6-second peek**. Each wrong piece takes one second off it for the rest of the run. If the peek hits zero, you lose. Survive all six orders to clear the scenario.
@@ -16,13 +16,13 @@ Like Sky Team, you pick a difficulty and then one of six scenarios inside it. Ev
 
 | Difficulty | Stack heights | Scenarios |
 |---|---|---|
-| Easy | 4–5 | Morning Coffee, School Pickup, Farmers Market, Beach Car Park, Sausage Sizzle, Sunday Brunch |
-| Medium | 5–6 | Lunch Rush, Office Park, Rainy Day, Uni Open Day, Car Show, Twilight Cinema |
-| Hard | 5–7 | Festival Friday, Night Market, Wedding Reception, Stadium Gates, Long Weekend, Heatwave |
-| Expert | 6–8 | Late Night Queue, Grand Final Day, New Year's Eve, Music Festival, Food Truck Rally, Closing Time |
-| Nightmare | 7–8 | Nightmare Shift, Health Inspection, Power Outage, Royal Visit, Double Booking, The Last Sausage |
+| Easy | 7–8 | Morning Coffee, School Pickup, Farmers Market, Beach Car Park, Sausage Sizzle, Sunday Brunch |
+| Medium | 8–9 | Lunch Rush, Office Park, Rainy Day, Uni Open Day, Car Show, Twilight Cinema |
+| Hard | 8–10 | Festival Friday, Night Market, Wedding Reception, Stadium Gates, Long Weekend, Heatwave |
+| Expert | 9–11 | Late Night Queue, Grand Final Day, New Year's Eve, Music Festival, Food Truck Rally, Closing Time |
+| Nightmare | 10–11 | Nightmare Shift, Health Inspection, Power Outage, Royal Visit, Double Booking, The Last Sausage |
 
-**Random shift** rolls a fresh stack height from 4 to 8 for every order, and new orders every time.
+**Random shift** rolls a fresh stack height from 7 to 11 for every order, and new orders every time.
 
 ## Files
 
