@@ -154,6 +154,11 @@ body { background: var(--frame); color: var(--card); font-family: var(--body); f
   border-radius: 10px; padding: 28px 18px; text-align: center; display: grid; gap: 8px;
   background: repeating-linear-gradient(45deg, var(--frame-2) 0 12px, #2c374a 12px 24px); border: 2px dashed #3b4860;
 }
+.btime { font: 700 3.4rem/1 var(--display); color: var(--go); font-variant-numeric: tabular-nums; }
+.btime.low { color: var(--beth); }
+.bbar { height: 8px; background: #3b4860; border-radius: 4px; overflow: hidden; margin: 0 8px; }
+.bbar i { display: block; height: 100%; background: var(--go); transform-origin: left; }
+.hint .tout { color: var(--beth); }
 .facedown .big { font: 700 2.3rem/1 var(--display); text-transform: uppercase; }
 .facedown p { margin: 0; color: var(--mist); }
 .hush { justify-self: center; display: inline-flex; align-items: center; gap: 8px; font: 600 .78rem var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--go); }
@@ -201,21 +206,24 @@ const img = (food, alt = "") => `<img src="${art(food)[0]}" alt="${alt}">`;
 
 const PLAYERS = { joe: { name: "Joe", color: "var(--joe)" }, beth: { name: "Beth", color: "var(--beth)" } };
 // Sky Team style: pick a difficulty, then one of six fixed scenarios in it.
-// Every scenario ramps up: an easy first order climbing to a hard last one (difficulty sets the range).
+// Every scenario ramps up gently: each difficulty climbs only one or two pieces over the shift.
 // Every scenario starts at the same peek; difficulty comes only from stack height.
 // Each scenario's orders are fixed (seeded), so replays are the same orders you can learn.
 const START_PEEK = 6, ORDERS = 6;
+// time to build each order: a few seconds per piece, so taller stacks get longer
+const BUILD_PER_PIECE = 5, BUILD_BASE = 5;
+const buildTime = n => BUILD_BASE + BUILD_PER_PIECE * n;
 const TIERS = [
   { name: "Easy", range: "5 → 6 high", color: "#3f9a57", list: [
     ["Morning Coffee", [5, 5, 5, 6, 6, 6]], ["School Pickup", [5, 5, 5, 5, 6, 6]], ["Farmers Market", [5, 6, 6, 6, 6, 6]], ["Beach Car Park", [5, 6, 5, 5, 6, 6]], ["Sausage Sizzle", [5, 5, 6, 5, 6, 6]], ["Sunday Brunch", [5, 5, 5, 5, 5, 6]] ] },
-  { name: "Medium", range: "6 → 10 high", color: "#e9b62f", list: [
-    ["Lunch Rush", [6, 7, 7, 8, 9, 10]], ["Office Park", [6, 6, 7, 7, 8, 10]], ["Rainy Day", [6, 8, 8, 8, 9, 10]], ["Uni Open Day", [6, 7, 9, 7, 9, 10]], ["Car Show", [6, 6, 8, 8, 10, 10]], ["Twilight Cinema", [6, 6, 6, 7, 8, 10]] ] },
-  { name: "Hard", range: "7 → 11 high", color: "#ff8a3d", list: [
-    ["Festival Friday", [7, 8, 8, 9, 10, 11]], ["Night Market", [7, 7, 8, 8, 9, 11]], ["Wedding Reception", [7, 9, 9, 9, 10, 11]], ["Stadium Gates", [7, 8, 10, 8, 10, 11]], ["Long Weekend", [7, 7, 9, 9, 11, 11]], ["Heatwave", [7, 7, 7, 8, 9, 11]] ] },
-  { name: "Expert", range: "8 → 12 high", color: "#e2372f", list: [
-    ["Late Night Queue", [8, 9, 9, 10, 11, 12]], ["Grand Final Day", [8, 8, 9, 9, 10, 12]], ["New Year's Eve", [8, 10, 10, 10, 11, 12]], ["Music Festival", [8, 9, 11, 9, 11, 12]], ["Food Truck Rally", [8, 8, 10, 10, 12, 12]], ["Closing Time", [8, 8, 8, 9, 10, 12]] ] },
-  { name: "Nightmare", range: "9 → 12 high", color: "#8b2bb0", list: [
-    ["Nightmare Shift", [9, 10, 10, 11, 12, 12]], ["Health Inspection", [9, 9, 10, 11, 12, 12]], ["Power Outage", [9, 11, 11, 11, 12, 12]], ["Royal Visit", [9, 10, 12, 10, 12, 12]], ["Double Booking", [9, 9, 11, 11, 12, 12]], ["The Last Sausage", [9, 9, 9, 10, 12, 12]] ] }
+  { name: "Medium", range: "6 → 7 high", color: "#e9b62f", list: [
+    ["Lunch Rush", [6, 6, 6, 7, 7, 7]], ["Office Park", [6, 6, 6, 6, 7, 7]], ["Rainy Day", [6, 7, 7, 7, 7, 7]], ["Uni Open Day", [6, 7, 6, 6, 7, 7]], ["Car Show", [6, 6, 7, 6, 7, 7]], ["Twilight Cinema", [6, 6, 6, 6, 6, 7]] ] },
+  { name: "Hard", range: "6 → 8 high", color: "#ff8a3d", list: [
+    ["Festival Friday", [6, 7, 7, 7, 8, 8]], ["Night Market", [6, 6, 7, 7, 7, 8]], ["Wedding Reception", [6, 7, 7, 7, 8, 8]], ["Stadium Gates", [6, 7, 8, 7, 8, 8]], ["Long Weekend", [6, 6, 7, 7, 8, 8]], ["Heatwave", [6, 6, 6, 7, 7, 8]] ] },
+  { name: "Expert", range: "7 → 9 high", color: "#e2372f", list: [
+    ["Late Night Queue", [7, 8, 8, 8, 9, 9]], ["Grand Final Day", [7, 7, 8, 8, 8, 9]], ["New Year's Eve", [7, 8, 8, 8, 9, 9]], ["Music Festival", [7, 8, 9, 8, 9, 9]], ["Food Truck Rally", [7, 7, 8, 8, 9, 9]], ["Closing Time", [7, 7, 7, 8, 8, 9]] ] },
+  { name: "Nightmare", range: "8 → 10 high", color: "#8b2bb0", list: [
+    ["Nightmare Shift", [8, 9, 9, 9, 10, 10]], ["Health Inspection", [8, 8, 9, 9, 9, 10]], ["Power Outage", [8, 9, 9, 9, 10, 10]], ["Royal Visit", [8, 9, 10, 9, 10, 10]], ["Double Booking", [8, 8, 9, 9, 10, 10]], ["The Last Sausage", [8, 8, 8, 9, 9, 10]] ] }
 ];
 const scenOf = id => { const [t, i] = id.split("-").map(Number); const [name, stacks] = TIERS[t].list[i]; return { id, t, i, name, stacks }; };
 const nextId = id => { const { t, i } = scenOf(id); return i < 5 ? `${t}-${i + 1}` : t < TIERS.length - 1 ? `${t + 1}-0` : null; };
@@ -250,7 +258,7 @@ function makeOrder(len, rnd, split) {
 function openMenu(tier = null) { cancelAnimationFrame(raf); S = { phase: "menu", tier }; }
 function startScenario(id) {
   const rand = id === "random";
-  const sc = rand ? { name: "Random shift", stacks: Array.from({ length: ORDERS }, () => 6 + (Math.random() * 6 | 0)).sort((x, y) => x - y) } : scenOf(id);
+  const sc = rand ? { name: "Random shift", stacks: Array.from({ length: ORDERS }, () => 5 + (Math.random() * 4 | 0)).sort((x, y) => x - y) } : scenOf(id);
   const deck = shuffle(KEYS);
   // the split is rolled once per run and kept for all six orders
   S = { id, rand, scen: sc, round: 0, peek: START_PEEK, phase: "ready", history: [], lastPenalty: null, split: { joe: deck.slice(0, 3), beth: deck.slice(3) } };
@@ -338,7 +346,7 @@ function scenCard(t, i) {
   return `<button class="scard${done ? " done" : ""}" type="button" data-sc="${id}" style="--tc:${TIERS[t].color}">
     <span class="shead"><span class="snum">${i + 1}</span>${done ? '<span class="tick">✓</span>' : ""}</span>
     <b>${name}</b>
-    <span class="bars" aria-label="Stack heights ${stacks.join(", ")}">${stacks.map(h => `<i style="height:${(h - 3) / 9 * 100}%"></i>`).join("")}</span>
+    <span class="bars" aria-label="Stack heights ${stacks.join(", ")}">${stacks.map(h => `<i style="height:${(h - 3) / 7 * 100}%"></i>`).join("")}</span>
     <span class="hrange">${stacks[0]} → ${stacks[ORDERS - 1]} high</span>
   </button>`;
 }
@@ -359,7 +367,7 @@ function render() {
       <div class="menu">${TIERS.map((_, t) => tierRow(t)).join("")}
       <button class="scen random" type="button" data-sc="random">
         <span class="snum">?</span>
-        <span class="sname"><b>Random shift</b><span>Climbs from 6 to 11 high · different every time</span></span>
+        <span class="sname"><b>Random shift</b><span>Climbs from 5 to 8 high · different every time</span></span>
         <span class="sbadge">Play</span>
       </button></div>
       <p class="menu-note">Every scenario starts with a ${START_PEEK}-second peek. Each wrong piece takes a second off it. If it hits zero, you lose. Survive all six orders to clear the scenario.</p>
@@ -385,13 +393,20 @@ function render() {
     stage.innerHTML = orderCard(false, `<div class="peekbar"><i id="bar"></i></div>`);
     go.textContent = "Memorise…"; go.disabled = true; go.className = "btn ghost";
   } else if (S.phase === "build") {
-    stage.innerHTML = `<div class="facedown"><span class="hush">Silence</span><span class="big">Build it</span><p>No talking about the order. Tweezers only. Piece 1 goes on the plate first.</p></div>${stationsHTML(true)}`;
-    go.textContent = "Reveal order";
+    const total = buildTime(S.order.length);
+    stage.innerHTML = `<div class="facedown">
+        <span class="hush">Silence</span>
+        <span class="big">Build it</span>
+        <span class="btime" id="btime">${total}</span>
+        <div class="bbar"><i id="bbar"></i></div>
+        <p>No talking about the order. Tweezers only. Piece 1 goes on the plate first.</p>
+      </div>${stationsHTML(true)}`;
+    go.textContent = "Done · reveal order";
   } else if (S.phase === "check") {
     const wrong = S.marks.filter(m => !m).length;
     const next = S.peek - wrong, dead = next <= 0, last = S.round === ORDERS - 1;
     stage.innerHTML = orderCard(true, `<div class="result"><span>Right <b>${S.order.length - wrong}/${S.order.length}</b></span><span>${dead ? `Peek <b class="out">hits zero</b>` : `Peek left <b>${next}s</b>`}</span></div>`) +
-      `<p class="hint">Tap any piece you got wrong: wrong food, wrong spot or wrong pose.</p>`;
+      `<p class="hint">${S.timedOut ? "<b class=\"tout\">Time's up.</b> Any piece you didn't place counts as wrong. " : ""}Tap any piece you got wrong: wrong food or wrong spot.</p>`;
     go.textContent = dead ? "Out of time" : last ? "Close the van" : "Next order";
   } else {
     const right = S.history.reduce((a, h) => a + h.right, 0), total = S.history.reduce((a, h) => a + h.len, 0);
@@ -425,13 +440,27 @@ function startPeek() {
     const left = Math.max(0, dur - (now - t0));
     bar.style.transform = `scaleX(${left / dur})`;
     count.textContent = Math.ceil(left / 1000);
-    if (left > 0) raf = requestAnimationFrame(tick); else { S.phase = "build"; render(); }
+    if (left > 0) raf = requestAnimationFrame(tick); else startBuild();
+  };
+  raf = requestAnimationFrame(tick);
+}
+function startBuild() {
+  S.phase = "build"; S.timedOut = false; render();
+  const dur = buildTime(S.order.length) * 1000, t0 = performance.now(), bar = $("bbar"), num = $("btime");
+  const tick = now => {
+    if (S.phase !== "build") return;
+    const left = Math.max(0, dur - (now - t0));
+    bar.style.transform = `scaleX(${left / dur})`;
+    num.textContent = Math.ceil(left / 1000);
+    num.classList.toggle("low", left < 10000);
+    if (left > 0) raf = requestAnimationFrame(tick);
+    else { S.timedOut = true; S.phase = "check"; render(); }
   };
   raf = requestAnimationFrame(tick);
 }
 go.addEventListener("click", () => {
   if (S.phase === "ready") startPeek();
-  else if (S.phase === "build") { S.phase = "check"; render(); }
+  else if (S.phase === "build") { cancelAnimationFrame(raf); S.phase = "check"; render(); }
   else if (S.phase === "check") {
     const wrong = S.marks.filter(m => !m).length;
     S.history.push({ len: S.order.length, right: S.order.length - wrong, peek: S.peek, marks: S.marks.slice() });
